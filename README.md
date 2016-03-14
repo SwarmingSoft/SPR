@@ -19,7 +19,7 @@ Linux:
 2) /.SPR.o sprdata_length sprdata U0 F f0 lambda dt rmin passive_frac t_sim_end N packing_frac seed  
 
 where (standard value in brackets)  
-sprdata_length (sprdata_length): "sprdata_length.txt" with space seperated lenghts, e.g. "8 8 8 8 8 8" for N=6 rods a length l=5  
+sprdata_length (sprdata_length): "sprdata_length.txt" with space seperated lengths, e.g. "8 8 8 8 8 8" for N=6 rods a length l=5  
 sprdata (sprdata): output file "sprdata.txt"  
 U0 (450): Yukawa potential amplitude  
 F (1): driving force  
