@@ -9,7 +9,8 @@ no additional dependencies
 
 call executable as  
 Windows: SPR.exe sprdata_length sprdata U0 F f0 lambda dt rmin passive_frac t_sim_end N packing_frac seed  
-Linux: /.SPR.o sprdata_length sprdata U0 F f0 lambda dt rmin passive_frac t_sim_end N packing_frac seed  
+Linux: /.SPR.o sprdata_length sprdata U0 F f0 lambda dt rmin passive_frac t_sim_end N packing_frac seed
+
 where (standard value in brackets)  
 sprdata_length: "sprdata_length.txt" with space seperated lenghts, e.g. "5 5 5 5 5 5" for N=6 rods a length l=5  
 sprdata: output file "sprdata.txt"  
