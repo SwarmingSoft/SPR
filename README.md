@@ -5,8 +5,8 @@ compiled with "-std=c++11", "-D_USE_MATH_DEFINES", "-DNDEBUG"
 tested with "-fexpensive-optimizations", "-O3", "-march=native"   
 on Windows 7 and Linux, e.g.  
 Windows:  
-1) g++.exe -Wall -D_USE_MATH_DEFINES  -fexpensive-optimizations -O3 -march=native -DNDEBUG  -std=c++11 SPR.cpp -o SPR.o
-2) g++.exe -o SPR.exe SPR.o
+1) g++.exe -Wall -D_USE_MATH_DEFINES  -fexpensive-optimizations -O3 -march=native -DNDEBUG  -std=c++11 SPR.cpp -o SPR.o  
+2) g++.exe -o SPR.exe SPR.o  
 Linux:  
 1) g++ -Wall -D_USE_MATH_DEFINES -fexpensive-optimizations -O3 -march=native -DNDEBUG -std=c++11 SPR.cpp -o SPR.o
 
