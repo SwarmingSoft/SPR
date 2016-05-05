@@ -1428,36 +1428,8 @@ void InitRods(Rods &rods, const std::vector<real> &lengths, const CMDParameterSP
     real x_tmp, y_tmp, customF;
     int failed_placements = 0;
 
-    //place first particle without restrictions
-    if (passive_mode == 3) //passive_frac must be time fraction (therefore > 1 etc)
-    {
-        customF = args.F;
-    }
-    else
-    {
-        customF = Fdist(gen)*args.F;
-    }
-    tryagain0:
-    x_tmp = realdist(gen);
-    y_tmp = realdist(gen);
-    Vector rod_pos_tmp(x_tmp, y_tmp);
-
-    if (x_tmp < args.L/2. - args.maxlength/2. && x_tmp > args.maxlength/2.)
-    {
-        rods[0] = Rod(args.lambda, rod_pos_tmp, Vector(booldist(gen)*2-1, 0), lengths[0], customF, args.f0, args.L); //Vector(booldist(gen)*2-1, 0)
-    }
-    else if (x_tmp > args.L/2. && x_tmp < args.L)
-    {
-        rods[0] = Rod(args.lambda, rod_pos_tmp, Vector(0, booldist(gen)*2-1), lengths[0], customF, args.f0, args.L); //Vector(booldist(gen)*2-1, 0)
-    }
-    else //nothing; clear zone; assures non-crossing rods
-    {
-        ++failed_placements;
-        goto tryagain0;
-    }
-
     //initialise rods at uniformly random positions in box with orientation upwards or downwards
-    for (unsigned int i = 1; i < rods.size(); ++i)
+    for (unsigned int i = 0; i < rods.size(); ++i)
     {
         if (passive_mode == 3) //passive_frac must be time fraction (therefore > 1 etc)
         {
@@ -1473,7 +1445,7 @@ void InitRods(Rods &rods, const std::vector<real> &lengths, const CMDParameterSP
         y_tmp = realdist(gen);
         Vector rod_pos_tmp(x_tmp, y_tmp);
 
-        if (x_tmp < args.L/2. - args.maxlength/2. && x_tmp > args.maxlength/2.) // left side
+        if (x_tmp < args.L/2. - lengths[i]/2. && x_tmp > lengths[i]/2.) // left side
         {
             for (unsigned int j = 0; j < i; ++j)
             {
