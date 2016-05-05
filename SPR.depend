@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1457974151 source:e:\uni\masterarbeit\github\spr\spr.cpp
+	<cmath>
+	<stdexcept>
+	<iostream>
+	<fstream>
+	<cassert>
+	<vector>
+	<utility>
+	<random>
+	<tuple>
+	<sstream>
+	"Vector2D.hpp"
+	"Buffer.hpp"
+
+1457974152 e:\uni\masterarbeit\github\spr\vector2d.hpp
+	<algorithm>
+	<cmath>
+	<limits>
+
+1457974151 e:\uni\masterarbeit\github\spr\buffer.hpp
+	<algorithm>
+	<cassert>
+	<cstring>
+
