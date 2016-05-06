@@ -1,5 +1,8 @@
 # Self-propelled rods (SPR)
 
+[![SPR phases](http://img.youtube.com/vi/Il_O4Af5o4g/0.jpg)](https://youtu.be/Il_O4Af5o4g)
+
+
 tested with gcc version 4.9.2 (x86_64-win32-seh-rev2, Built by MinGW-W64 project)   
 compiled with "-std=c++11", "-D_USE_MATH_DEFINES", "-DNDEBUG"  
 tested with "-fexpensive-optimizations", "-O3", "-march=native"   
