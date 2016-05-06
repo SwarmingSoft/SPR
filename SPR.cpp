@@ -1,4 +1,4 @@
-//v 05.02.2015
+//v 06.05.2016
 
 #include <cmath>
 #include <stdexcept>
@@ -54,6 +54,8 @@ unsigned int number_of_boxes = 40; // number of boxes in one dimension; change t
 //4 cases: 0.0,false,false: no passive particles; x,false,false: static passive fraction; x,true,false: passive fraction constant, but dynamically the x with lowest potential; x,true,true: passive fraction non constant and is every rod that has potential below x times the maximum potential
 */
 
+
+//return maximum element of std::vector
 template <typename T> T MaxElement(const std::vector<T> &elements)
 {
     T max = elements.front();
@@ -69,7 +71,10 @@ template <typename T> T MaxElement(const std::vector<T> &elements)
     return max;
 }
 
-//tuple (number of boxes, real_packing_fraction) from aimed for packing fraction, rmin, lambda and length distribution [infile]
+
+//calculates the needed number of boxes for uniform grid optimisation (and therefore simulation box lengths) from aimed for packing fraction
+//in: aimed for packing fraction, lengths, lambda, rmin
+//out: tuple with (number of boxes, real packing fraction)
 std::tuple<unsigned int, real> CalcNumberOfBoxes(real packing_fraction, real rmin, const std::vector<real> &lengths, real lambda)
 {
     real sum_areas = 0;
@@ -83,7 +88,8 @@ std::tuple<unsigned int, real> CalcNumberOfBoxes(real packing_fraction, real rmi
     return std::make_tuple(num_boxes, sum_areas/(rmin*rmin*num_boxes*num_boxes));
 }
 
-//average aspect ratio
+
+//average aspect ratio from lengths and lambda
 real CalcAvgAspectRatio(const std::vector<real> &lengths, real lambda)
 {
     real avg_ar = 0;
@@ -95,6 +101,8 @@ real CalcAvgAspectRatio(const std::vector<real> &lengths, real lambda)
     return avg_ar/lengths.size();
 }
 
+
+//class storing all parameters passed by command line arguments
 class CMDParameterSPR
 {
 public:
@@ -178,14 +186,6 @@ public:
     }
 };
 
-/*
-//modifies global vars
-void SetMaxlength(real length)
-{
-    maxlength = length;
-    boxlength = maxlength - lambda + rmin;
-    SPR.L = real(number_of_boxes) * boxlength;
-}*/
 
 //n (number of segments per rod) from aspect ratio
 unsigned int GetNumberOfParts(real aspect_ratio)
@@ -365,6 +365,9 @@ public:
     Rod &operator/=(real dt);
 };
 
+
+//single yukawa potential (or similar) point particle -> disk
+//store segment identity in rod, identity in box (for optimisation) grid and position
 class Segment
 {
 public:
