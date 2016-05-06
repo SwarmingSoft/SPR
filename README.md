@@ -1,6 +1,9 @@
 # Self-propelled rods (SPR)
 
+- phases
 [![SPR phases](http://img.youtube.com/vi/Il_O4Af5o4g/0.jpg)](https://youtu.be/Il_O4Af5o4g)
+- passive particles
+[![SPR passive](http://img.youtube.com/vi/qkhRiROX6ss/0.jpg)](https://youtu.be/qkhRiROX6ss)
 
 
 tested with gcc version 4.9.2 (x86_64-win32-seh-rev2, Built by MinGW-W64 project)   
