@@ -35,3 +35,8 @@ t_sim_end (20000): timesteps till termination
 N (1000): number of particles  
 packing_fraction (0.5): aimed for packing fraction between 0. and 1.  
 seed (477): random number generator seed (integer)  
+
+
+updates:
+- added easy-to-use Codeblocks project file (multi OS)
+- added example Mathematica notebook file for rendering pngs

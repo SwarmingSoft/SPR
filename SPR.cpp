@@ -1,4 +1,4 @@
-//v 06.05.2016
+//v 12.05.2016
 
 #include <cmath>
 #include <stdexcept>
@@ -17,14 +17,9 @@
 typedef float real;
 typedef Vector2DT<real> Vector;
 
-//TODO
-/*
--potential for potential dependent friction: shift by U(rmin) for r<rmin (masoud abkenar phd page 36)
--F passive_fraction adaptive
-*/
 
 /*KNOWN OR SUSPECTED ISSUES
--since the small box optimization it is possible that pointers for runge-kutta und co can become invalid (due to copying)
+-since the small box optimization it is possible that pointers for runge-kutta und co can become invalid (due to copying), only euler integration is tested
 */
 
 
@@ -34,7 +29,7 @@ Nomenclature and most details as in "Meso-scale turbulence in living fluids"
 (Wensink et al, 2012). "eq. [x]" means [x] in this paper, "SI" supportive info.
 */
 
-/* passive mode:
+/* passive mode (has to be defined at compile time for performance reasons, so compile executables for each mode seperately!):
 0 : passive static, fraction of particles
 1 : passive adaptive, fraction of particles
 2 : passive adaptive, fraction of maximum potential
@@ -553,7 +548,7 @@ real Rod::l(unsigned int i) const
     return ls[i];
 }
 
-// add two rods while preserving periodic bounaries
+// add two rods (i.e. postions and headings) while preserving periodic bounaries
 // should only be used to add the same two rods at different times
 Rod Rod::operator+(const Rod &rhs) const
 {
@@ -571,7 +566,7 @@ Rod Rod::operator+(const Rod &rhs) const
     //return Rod(lambda, Vector(r.x + rhs.r.x, r.y + rhs.r.y), u+rhs.u, length, F); //non-periodic
 }
 
-// appends a rod while preserving periodic boundaries
+// appends a rod (i.e. postions and headings) while preserving periodic boundaries
 // should only be used to append the same two rods at a different time
 Rod &Rod::operator+=(const Rod &rhs)
 {
@@ -1675,20 +1670,24 @@ std::vector<real> ReadLengths(std::string filename)
 //MAIN
 int main(int argc, char** argv)
 {
+    // create storeage object (using command line input)
     CMDParameterSPR args(argc, argv);
 
+    // read in rod lengths from file
     std::vector<real> lengths = ReadLengths(args.in_file);
 
+    // set parameters as of command line input
     args.SetRemainingParameters(lengths);
 
     //SetMaxlength(MaxElement(lengths));
     //assert(boxlength >= maxlength);
 
+    // create list of rods, SPR class object and initialise rods
     Rods x(args.N);
     SPR f(args);
     InitRods(x, lengths, args);
 
-    //std::ostream &out = std::cout;
+    // open output file stream
     std::ofstream out;
     out.open(args.out_file);
     if (!out)
@@ -1696,25 +1695,30 @@ int main(int argc, char** argv)
         throw std::runtime_error("Could not open output file!");
     }
 
-    //header in sprdata.txt
+    // pipe header (command line input) into output file
     out << args.header() << std::endl;
 
+    // open another file stream (.extras.txt) for additional output,
+    // e.g. active particle fraction
     std::ofstream outextras;
-    outextras.open(args.out_file.substr(0, args.out_file.size() - 4) + ".extras.txt"); //TODO kill ".txt.extras.txt"
+    outextras.open(args.out_file.substr(0, args.out_file.size() - 4) + ".extras.txt");
     if (!outextras)
     {
         throw std::runtime_error("Could not open extras output file!");
     }
 
+    // pipe header (command line input) also into extras output file
     outextras << args.header() << std::endl;
     outextras << "active" << std::endl;
 
     std::cout << "Initialisation complete." << std::endl;
 
+    // output initial system configuration
     std::cout << "t: 0" << std::endl;
     output(out, outextras, x);
 
-    int t_threshold = 1; //when to output
+    // time steps between consecutive outputs
+    int t_threshold = 1;
 
     real t = real(0);
 
@@ -1752,7 +1756,8 @@ int main(int argc, char** argv)
         }
     }
 
-    for (; t < args.t_sim_end; t += args.dt) //real t = 0
+    // main loop: until termination time integrate equations of motion and output
+    for (; t < args.t_sim_end; t += args.dt)
     {
         if (t >= t_threshold)
         {
