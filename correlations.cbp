@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="correlations" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option extended_obj_names="1" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/correlations" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters='\&quot;\&quot; &quot;sprdata.txt&quot; \&quot;\&quot; 0 0 1 1 26. 5.0 0.349 -0.001 1. 0.001 -0.34 0.34 0.01 0. 26. 0.26 0 10 1 0 10 1 1 10 1 64 64' />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/correlations" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters='\&quot;\&quot; &quot;sprdata.txt&quot; \&quot;\&quot; 0 0 1 1 26. 5.0 0.349 -0.001 1. 0.001 -0.34 0.34 0.01 0. 26. 0.26 0 10 1 0 10 1 1 10 1 64 64' />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-march=native" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+		</Compiler>
+		<Unit filename="Buffer.hpp" />
+		<Unit filename="constants.hpp" />
+		<Unit filename="constantsSPR.cpp" />
+		<Unit filename="constantsSPR.hpp" />
+		<Unit filename="correlations.cpp" />
+		<Unit filename="correlations.hpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
