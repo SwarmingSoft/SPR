@@ -1,4 +1,4 @@
-//v 12.05.2016
+//v 21.05.2016
 
 #include <cmath>
 #include <stdexcept>
@@ -1490,7 +1490,7 @@ void InitRods(Rods &rods, const std::vector<real> &lengths, const CMDParameterSP
 //output center of mass positions x and orientations (in rad wrt to x axis)
 //into stream (eg file)
 //makes sure no space appears at eol
-void output(std::ostream &out, std::ostream &outextras, const Rods &x)
+void output(std::ostream &out, std::ostream &outextras, std::ostream &outpassive, const Rods &x)
 {
     for (unsigned int i = 0; i < x.size() - 1; ++i)
     {
@@ -1507,8 +1507,10 @@ void output(std::ostream &out, std::ostream &outextras, const Rods &x)
     for (const auto &rod : x)
     {
         active += int(rod.active);
+        outpassive << int(rod.active) << " ";
     }
     outextras << real(active) / x.size() << std::endl;
+    outpassive << std::endl;
 }
 
 /// START FUNCTION TESTS
@@ -1706,16 +1708,26 @@ int main(int argc, char** argv)
     {
         throw std::runtime_error("Could not open extras output file!");
     }
+    
+    //open another file stream (.passive.txt) to output indices as of
+    //positions/orientations in the original output
+    std::ofstream outpassive;
+    outpassive.open(args.out_file.substr(0, args.out_file.size() - 4) + ".passive.txt");
+    if (!outpassive)
+    {
+        throw std::runtime_error("Could not open passive output file!");
+    }
 
-    // pipe header (command line input) also into extras output file
+    // pipe header (command line input) also into extras/passive output files
     outextras << args.header() << std::endl;
     outextras << "active" << std::endl;
+    outpassive << args.header() << std::endl;
 
     std::cout << "Initialisation complete." << std::endl;
 
     // output initial system configuration
     std::cout << "t: 0" << std::endl;
-    output(out, outextras, x);
+    output(out, outextras, outpassive, x);
 
     // time steps between consecutive outputs
     int t_threshold = 1;
@@ -1751,7 +1763,7 @@ int main(int argc, char** argv)
         //output
         if (t >= t_threshold)
         {
-            output(out, outextras, x);
+            output(out, outextras, outpassive, x);
             t_threshold += 1;
         }
     }
@@ -1806,7 +1818,7 @@ int main(int argc, char** argv)
         //output
         if (t >= t_threshold)
         {
-            output(out, outextras, x);
+            output(out, outextras, outpassive, x);
             t_threshold += 1;
         }
     }
@@ -1815,4 +1827,5 @@ int main(int argc, char** argv)
 
     out.close();
     outextras.close();
+    outpassive.close();
 }
