@@ -38,7 +38,7 @@ seed (477): random number generator seed (integer)
 
 
 updates:
-- added easy-to-use Codeblocks project file (multi OS)
+- added easy-to-use Codeblocks project file (multi OS; on Windows make sure to use http://mingw-w64.org/ instead of factory default compiler)
 - added example Mathematica notebook file for rendering pngs
 - added quick-and-dirty evaluation of some correlation functions, number fluctuations, cluster size distributions etc
 - added passive particle identity output
