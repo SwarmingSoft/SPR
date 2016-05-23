@@ -36,6 +36,7 @@
 			<Add option="-std=c++11" />
 		</Compiler>
 		<Unit filename="Buffer.hpp" />
+		<Unit filename="constants.hpp" />
 		<Unit filename="constantsSPR.cpp" />
 		<Unit filename="constantsSPR.hpp" />
 		<Unit filename="correlations.cpp" />
