@@ -14,6 +14,10 @@
 #include "Vector2D.hpp"
 #include "Buffer.hpp"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 typedef float real;
 typedef Vector2DT<real> Vector;
 
@@ -1708,7 +1712,7 @@ int main(int argc, char** argv)
     {
         throw std::runtime_error("Could not open extras output file!");
     }
-    
+
     //open another file stream (.passive.txt) to output indices as of
     //positions/orientations in the original output
     std::ofstream outpassive;

@@ -38,10 +38,28 @@ uint_FlowGridPoints  - number of flow grid points (only interesting for opticalf
 #include <fstream>
 #include <cmath>
 #include <stdexcept>
+#include <sstream>
+
 
 typedef unsigned int ID;
 typedef unsigned int TIME;
 typedef real ANGLE;
+
+//string to integer
+int stoi(const std::string& s) {
+    std::istringstream str(s);
+    int i;
+    str >> i;
+    return i;
+}
+
+//real to integer
+real stof(const std::string& s) {
+    std::istringstream str(s);
+    real i;
+    str >> i;
+    return i;
+}
 
 //copied from SPR.cpp
 //difference p1-p2 (vectors) periodic an square LxL
@@ -1464,38 +1482,38 @@ int main(int argc, char** argv)
     std::string filename = argv[2];
     std::string filename_ids = argv[3];
 
-    bool ids_from_file = std::stoi(argv[4]); //false for vicsek and spr, true for tracking
-    bool read_flow = std::stoi(argv[5]); // true for flow
-    bool periodic_boundary = std::stoi(argv[6]); //true for visek and spr, false for tracking
-    bool periodic_velocities = std::stoi(argv[7]); //true for spr and vicsek
+    bool ids_from_file = stoi(argv[4]); //false for vicsek and spr, true for tracking
+    bool read_flow = stoi(argv[5]); // true for flow
+    bool periodic_boundary = stoi(argv[6]); //true for visek and spr, false for tracking
+    bool periodic_velocities = stoi(argv[7]); //true for spr and vicsek
 
-    real L = std::stof(argv[8]);
+    real L = stof(argv[8]);
 
-    real cluster_com_dist = std::stof(argv[9]);
-    real cluster_angle_dist = std::stof(argv[10]);
+    real cluster_com_dist = stof(argv[9]);
+    real cluster_angle_dist = stof(argv[10]);
 
-    real vel_histo_start = std::stof(argv[11]);
-    real vel_histo_end = std::stof(argv[12]);
-    real vel_histo_step = std::stof(argv[13]);
-    real vor_histo_start = std::stof(argv[14]);
-    real vor_histo_end = std::stof(argv[15]);
-    real vor_histo_step = std::stof(argv[16]);
+    real vel_histo_start = stof(argv[11]);
+    real vel_histo_end = stof(argv[12]);
+    real vel_histo_step = stof(argv[13]);
+    real vor_histo_start = stof(argv[14]);
+    real vor_histo_end = stof(argv[15]);
+    real vor_histo_step = stof(argv[16]);
 
-    real rmin = std::stof(argv[17]);
-    real rmax = std::stof(argv[18]);
-    real rstep = std::stof(argv[19]);
+    real rmin = stof(argv[17]);
+    real rmax = stof(argv[18]);
+    real rstep = stof(argv[19]);
 
-    unsigned int tstart = std::stoi(argv[20]);
-    unsigned int tend = std::stoi(argv[21]);
-    unsigned int tstep = std::stoi(argv[22]);
-    unsigned int Xvortstart = std::stoi(argv[23]);
-    unsigned int Xvortend = std::stoi(argv[24]);
-    unsigned int Xvortstep = std::stoi(argv[25]);
-    unsigned int times_start = std::stoi(argv[26]);
-    unsigned int times_stop = std::stoi(argv[27]);
-    unsigned int times_step = std::stoi(argv[28]);
-    unsigned int vorticity_bins = std::stoi(argv[29]);
-    unsigned int FlowGridPoints = std::stoi(argv[30]);
+    unsigned int tstart = stoi(argv[20]);
+    unsigned int tend = stoi(argv[21]);
+    unsigned int tstep = stoi(argv[22]);
+    unsigned int Xvortstart = stoi(argv[23]);
+    unsigned int Xvortend = stoi(argv[24]);
+    unsigned int Xvortstep = stoi(argv[25]);
+    unsigned int times_start = stoi(argv[26]);
+    unsigned int times_stop = stoi(argv[27]);
+    unsigned int times_step = stoi(argv[28]);
+    unsigned int vorticity_bins = stoi(argv[29]);
+    unsigned int FlowGridPoints = stoi(argv[30]);
 
 
 

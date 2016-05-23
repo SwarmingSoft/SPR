@@ -35,9 +35,8 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-std=c++11" />
 			<Add option="-Wall" />
-			<Add option="-D_USE_MATH_DEFINES" />
+			<Add option="-std=c++11" />
 		</Compiler>
 		<Unit filename="Buffer.hpp" />
 		<Unit filename="SPR.cpp" />
