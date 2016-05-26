@@ -5,3 +5,5 @@ obj/
 bin/
 backup/
 correlations.py
+utils.py
+*.pyc
