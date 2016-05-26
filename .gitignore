@@ -3,3 +3,5 @@
 *.depend
 obj/
 bin/
+backup/
+correlations.py

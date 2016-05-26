@@ -1,6 +1,7 @@
 //constants.cpp v16 30.10.2015
 
 #include "constantsSPR.hpp"
+#include <array>
 
 /*
 see paper: Dynamical maximum entropy approach to flocking
@@ -520,7 +521,7 @@ real DynamicLogLikelihoodMaximized(real N, real C1s, real Cs, real Gs, real CTs,
 void output(Posdict &positions, Angdict &angles, std::vector<unsigned int> &times)
 {
     std::cout << "sizeof(times) = " << times.size() << "\n";
-    std::array<unsigned int, 2> step {0, 1};
+    std::array<unsigned int, 2> step = {0, 1};
 
     std::vector<Vector> positionsv;
 

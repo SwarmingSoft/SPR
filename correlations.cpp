@@ -38,6 +38,7 @@ uint_FlowGridPoints  - number of flow grid points (only interesting for opticalf
 #include <fstream>
 #include <cmath>
 #include <stdexcept>
+#include <array>
 
 typedef unsigned int ID;
 typedef unsigned int TIME;
@@ -139,7 +140,7 @@ std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vec
         std::cerr << "\rleft=" << rleft << "/" << rmax;
 
         //for all times
-        for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+        for (TIME t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
         {
             assert(positions[t].size() == velocities[t].size());
             //for all particles
@@ -184,7 +185,7 @@ std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vec
             }
         }
         c = (num == 0 ? 0. : sum / num - (sum1 / num) * (sum2 / num));
-        ret.push_back({rleft, c});
+        ret.push_back(std::array<real, 2> {rleft, c});
     }
 
     real norm = ret.front()[1];
@@ -255,10 +256,10 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
     }
 
     //for all time bins
-    for (unsigned int dt = tmin; dt < std::min(tmax, velocities.size()); dt += tstep)
+    for (unsigned int dt = tmin; dt < std::min(tmax, static_cast<unsigned int> (velocities.size())); dt += tstep)
     {
         tminmax = dt + tstep;
-        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, velocities.size()) << "      ";
+        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, static_cast<unsigned int> (velocities.size())) << "      ";
         real sum = 0.;
         Vector sum1(0., 0.), sum2(0., 0.);
         unsigned int num = 0;
@@ -290,7 +291,7 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
 
         //average over space
         c = (num == 0 ? 0. : sum / num - (sum1 / num) * (sum2 / num));
-        ret.push_back({dt, c});
+        ret.push_back(std::array<real, 2> {dt, c});
     }
 
     //normalize final correlation
@@ -374,10 +375,10 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
     }
 
     //for all time bins
-    for (unsigned int dt = tmin; dt < std::min(tmax, velocities.size()); dt += tstep)
+    for (unsigned int dt = tmin; dt < std::min(tmax, static_cast<unsigned int> (velocities.size())); dt += tstep)
     {
         tminmax = dt + tstep;
-        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, velocities.size()) << "      ";
+        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, static_cast<unsigned int> (velocities.size())) << "      ";
         real sum = 0., sum1 = 0., sum2 = 0.;
         unsigned int num = 0;
 
@@ -409,7 +410,7 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
 
         //average over space
         c = (num == 0 ? 0. : sum / num - (sum1 / num) * (sum2 / num));
-        ret.push_back({dt, c});
+        ret.push_back(std::array<real, 2> {dt, c});
     }
 
     //normalize final correlation
@@ -444,7 +445,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all times
-    for (unsigned int t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
     {
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         //for all particles
@@ -503,7 +504,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
             num = 0;
             rright = rleft + rstep;
 
-            std::cerr << "\rtleft=" << t << "/" << std::min(tmax, velocities.size()) << " " << "rleft=" << rleft << "/" << rmax << "      ";
+            std::cerr << "\rtleft=" << t << "/" << std::min(tmax, static_cast<unsigned int> (velocities.size())) << " " << "rleft=" << rleft << "/" << rmax << "      ";
 
 
             //for all combinations of bins
@@ -566,7 +567,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
         {
             sd_c = std::sqrt(1./(mean_counter - 1) * sd_c);
         }
-        ret.push_back({rleft, mean_c, sd_c});
+        ret.push_back(std::array<real, 3> {rleft, mean_c, sd_c});
         ret2_ind += 1;
     }
 
@@ -609,7 +610,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
     unsigned int maxlen = 0;
     for (const auto &vellist : per_id_velocities)
     {
-        maxlen = std::max(maxlen, vellist.second.size());
+        maxlen = std::max(maxlen, static_cast<unsigned int> (vellist.second.size()));
     }
 
     std::cerr << " " << maxlen << std::endl;
@@ -624,7 +625,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
     for (const auto &entry : per_id_velocities)
     {
         const auto &vellist = entry.second;
-        for (TIME deltat = tmin; deltat < std::min(vellist.size(), tmax); deltat += tstep)
+        for (TIME deltat = tmin; deltat < std::min(static_cast<unsigned int> (vellist.size()), tmax); deltat += tstep)
         {
             //TODO bin times
             for (TIME start = 0; start < vellist.size() - deltat; ++start)
@@ -646,7 +647,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
     std::vector<std::array<real, 2>> ret(maxlen);
     for (TIME t = 0; t < maxlen; ++t)
     {
-        ret[t] = {t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
+        ret[t] = std::array<real, 2>{t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
     }
 
     real norm = ret.front()[1];
@@ -756,7 +757,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
     unsigned int maxlen = 0;
     for (const auto &vellist : per_id_vorticities)
     {
-        maxlen = std::max(maxlen, vellist.second.size());
+        maxlen = std::max(maxlen, static_cast<unsigned int> (vellist.second.size()));
     }
 
     std::cerr << " " << maxlen << std::endl;
@@ -771,7 +772,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
     for (const auto &entry : per_id_vorticities)
     {
         const auto &vellist = entry.second;
-        for (TIME deltat = tmin; deltat < std::min(vellist.size(), tmax); deltat += tstep)
+        for (TIME deltat = tmin; deltat < std::min(static_cast<unsigned int> (vellist.size()), tmax); deltat += tstep)
         {
             //TODO bin times
             for (TIME start = 0; start < vellist.size() - deltat; ++start)
@@ -793,7 +794,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
     std::vector<std::array<real, 2>> ret(maxlen);
     for (TIME t = 0; t < maxlen; ++t)
     {
-        ret[t] = {t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
+        ret[t] = std::array<real, 2> {t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
     }
 
     real norm = ret.front()[1];
@@ -825,7 +826,7 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all times
-    for (unsigned int t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
     {
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         //for all particles
@@ -891,7 +892,7 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
     ret2_ind = 0;
     for (rleft = rmin; rleft < rmax; rleft += rstep)
     {
-        ret.push_back({rleft, ret2[ret2_ind], 0.});
+        ret.push_back(std::array<real, 3> {rleft, ret2[ret2_ind], 0.});
         ret2_ind += 1;
     }
 
@@ -917,7 +918,7 @@ std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> 
     }
 
     //for all times
-    for (unsigned int t = tmin; t < std::min(tmax, velocities.size()); t += tstep)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep)
     {
         //for all particles
         for (unsigned int j = 0; j < velocities[t].size(); ++j)
@@ -940,7 +941,7 @@ std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> 
     ret2_ind = 0;
     for (rleft = rmin; rleft < rmax; rleft += rstep)
     {
-        ret.push_back({rleft, ret2[ret2_ind], 0.});
+        ret.push_back(std::array<real, 3> {rleft, ret2[ret2_ind], 0.});
         ret2_ind += 1;
     }
 
@@ -961,7 +962,7 @@ std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std
     std::map<ID, std::vector<unsigned int>> ret2;
     std::map<ID, std::vector<real>> per_id_velocities;
 
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep)
+    for (TIME t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep)
     {
         for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
@@ -1006,7 +1007,7 @@ std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std
         ret2_ind = 0;
         for (rleft = rmin; rleft < rmax; rleft += rstep)
         {
-            ret[entry.first].push_back({rleft, ret2[entry.first][ret2_ind], 0.});
+            ret[entry.first].push_back(std::array<real, 3> {rleft, ret2[entry.first][ret2_ind], 0.});
             ret2_ind += 1;
         }
     }
@@ -1024,7 +1025,7 @@ std::map<ID, std::array<real, 3>> perIDtraveledPathlength(std::vector<std::vecto
     std::map<ID, std::array<real, 3>> ret;
     std::map<ID, std::vector<real>> per_id_velocities;
 
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep)
+    for (TIME t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep)
     {
         for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
@@ -1038,7 +1039,7 @@ std::map<ID, std::array<real, 3>> perIDtraveledPathlength(std::vector<std::vecto
     //for all ids
     for (std::pair<ID, std::vector<real>> entry : per_id_velocities)
     {
-        ret[entry.first] = {0., 0., 0.};
+        ret[entry.first] = std::array<real, 3> {0., 0., 0.};
 
         //for all particles of a id
         for (real vnorm : entry.second)
@@ -1140,7 +1141,7 @@ std::vector<std::array<real, 3>> number_fluctuations(std::vector<std::vector<Vec
         sd_abs_dist_to_average /= (element->second.size()-1);
         sd_abs_dist_to_average = std::sqrt(sd_abs_dist_to_average);
 
-        ret.push_back({real(max_no_of_particles) / (element->first * element->first), mean_abs_dist_to_average, sd_abs_dist_to_average});
+        ret.push_back(std::array<real, 3> {real(max_no_of_particles) / (element->first * element->first), mean_abs_dist_to_average, sd_abs_dist_to_average});
     }
 
     return ret;
@@ -1187,7 +1188,7 @@ std::vector<std::map<unsigned int, unsigned int>> clusterSizes(std::vector<std::
     std::vector<std::map<unsigned int, unsigned int>> ret;
     int delete_index, cluster_index;
     bool cluster_cond;
-    for (TIME t = tstart; t < std::min(tstop, positions.size()); t += tstep)
+    for (TIME t = tstart; t < std::min(tstop, static_cast<unsigned int> (positions.size())); t += tstep)
     {
         cluster_index = 0;
 
@@ -1294,7 +1295,7 @@ real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vect
     assert(positions.size() == velocities.size());
 
     //for all times
-    for (unsigned int t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
     {
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         //for all particles

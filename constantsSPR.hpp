@@ -17,7 +17,6 @@
 #include "Vector2D.hpp"
 
 typedef double real; //float, double, ...
-typedef unsigned int index;
 
 const real PI = 3.141592653589793238463;
 
