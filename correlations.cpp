@@ -36,7 +36,7 @@ uint_FlowGridPoints  - number of flow grid points (only interesting for opticalf
 
 #include "correlations.hpp"
 
-typedef unsigned int ID;
+typedef size_t ID;
 typedef size_t TIME;
 typedef real ANGLE;
 
@@ -1599,7 +1599,7 @@ int main(int argc, char** argv)
     //ids: read in from file or generate automatically based on indice in
     //positions/angle/... list
     std::vector<std::vector<ID>> ids;
-    int N;
+    size_t N;
     if (ids_from_file)
     {
         read_ids(path + filename_ids, ids, ALLTIMES);
@@ -1611,7 +1611,7 @@ int main(int argc, char** argv)
         //ids are always 0 to N-1
         for (auto _: ALLTIMES)
         {
-            ids.push_back(MakeTimes(0, N, 1));
+            ids.push_back(MakeTimes<size_t>(0, N, 1));
         }
     }
 

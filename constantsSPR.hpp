@@ -159,9 +159,18 @@ real DynamicLogLikelihoodMaximized(real N, real C1s, real Cs, real Gs, real CTs,
 
 void output(Posdict &positions, Angdict &angles, std::vector<unsigned int> &times);
 
-std::string read_data_consecutive(std::string filename, Posdict &positions, Angdict &angles, std::vector<unsigned int> &times);
-std::string read_data_single(std::string filename, Posdict &positions, Angdict &angles, std::vector<unsigned int> &times);
+std::string read_data_consecutive(std::string filename, Posdict &positions, Angdict &angles, std::vector<size_t> &times);
+std::string read_data_single(std::string filename, Posdict &positions, Angdict &angles, std::vector<size_t> &times);
 
-std::vector<unsigned int> MakeTimes(unsigned int start, unsigned int stop, unsigned int step);
+template <typename T> std::vector<T> MakeTimes(T start, T stop, T step)
+{
+    assert(start <= stop);
+    std::vector<T> times;
+    for (T t = start; t < stop; t += step)
+    {
+        times.push_back(t);
+    }
+    return times;
+}
 
 #endif //CONSTANTS_HEADER
