@@ -548,15 +548,15 @@ void output(Posdict &positions, Angdict &angles, std::vector<unsigned int> &time
 // times = {1,2} reads line {1,2,3}
 // times = {1,3} reads line {1,2,3,4}
 // times = {1,4} reads line {1,2,4,5}
-std::string read_data_consecutive(std::string filename, Posdict &positions, Angdict &angles, std::vector<size_t> &times)
+std::string read_data_consecutive(std::string filename, Posdict &positions, Angdict &angles, std::vector<unsigned int> &times)
 {
     std::ifstream in;
     in.open(filename);
     assert(!in.fail() && "Could not open file");
 
     real pos1, pos2, angle;
-    size_t linenum = 1;
-    size_t time = 0;
+    unsigned int linenum = 1;
+    unsigned int time = 0;
 
     std::string firstline, line;
     std::vector<Vector> positionsv; //()
@@ -614,15 +614,15 @@ std::string read_data_consecutive(std::string filename, Posdict &positions, Angd
 }
 
 // times = {1,2,3} reads line 1,2,3
-std::string read_data_single(std::string filename, Posdict &positions, Angdict &angles, std::vector<size_t> &times)
+std::string read_data_single(std::string filename, Posdict &positions, Angdict &angles, std::vector<unsigned int> &times)
 {
     std::ifstream in;
     in.open(filename);
     assert(!in.fail() && "Could not open file");
 
     real pos1, pos2, angle;
-    size_t linenum = 1;
-    size_t time = 0;
+    unsigned int linenum = 1;
+    unsigned int time = 0;
 
     std::string firstline, line;
     std::vector<Vector> positionsv; //()
@@ -675,4 +675,15 @@ void set_diagonal_true(MATRIX &n)
     {
         n.Set(i, i, true);
     }
+}
+
+std::vector<unsigned int> MakeTimes(unsigned int start, unsigned int stop, unsigned int step)
+{
+    assert(start <= stop);
+    std::vector<unsigned int> times;
+    for (unsigned int t = start; t < stop; t += step)
+    {
+        times.push_back(t);
+    }
+    return times;
 }

@@ -35,12 +35,14 @@ uint_FlowGridPoints  - number of flow grid points (only interesting for opticalf
 */
 
 #include "correlations.hpp"
+#include <fstream>
+#include <cmath>
+#include <stdexcept>
+#include <array>
 
-typedef size_t ID;
-typedef size_t TIME;
+typedef unsigned int ID;
+typedef unsigned int TIME;
 typedef real ANGLE;
-
-//static_assert(sizeof(unsigned int) == sizeof(std::vector<real>::size_type), "32 bit only");
 
 //copied from SPR.cpp
 //difference p1-p2 (vectors) periodic an square LxL
@@ -118,7 +120,7 @@ Vector FixBorder(Vector x, real L)
 //spatial velocity-velocity correlation function AND spatial orientation-orientation correlation function AND spatial direction-direction correlation function
 //rmin, rmax, rstep: start, stop and width of correlation bins, tmin, tmax, tstep: start, stop und steps of time averaging
 template <bool periodic>
-std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, TIME tmin, TIME tmax, TIME tstep, real L)
+std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, unsigned int tmin, unsigned int tmax, unsigned int tstep, real L)
 {
     real com_dist, rleft, rright, sum, c;
     Vector v, vr, x, xr;
@@ -138,7 +140,7 @@ std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vec
         std::cerr << "\rleft=" << rleft << "/" << rmax;
 
         //for all times
-        for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+        for (TIME t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
         {
             assert(positions[t].size() == velocities[t].size());
             //for all particles
@@ -183,7 +185,7 @@ std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vec
             }
         }
         c = (num == 0 ? 0. : sum / num - (sum1 / num) * (sum2 / num));
-        ret.push_back({rleft, c});
+        ret.push_back(std::array<real, 2> {rleft, c});
     }
 
     real norm = ret.front()[1];
@@ -199,12 +201,11 @@ std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vec
 
 //temporal velocity-velocity correlation function AND temporal orientation-orientation correlation function AND temporal direction-direction correlation function
 //tmin, tmax, tstep: time bins, vorbin: number of spatial bins
-std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, TIME tmin, TIME tmax, TIME tstep, unsigned int vorbin, real L)
+std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, unsigned int tmin, unsigned int tmax, unsigned int tstep, unsigned int vorbin, real L)
 {
     real c, l = L / vorbin;
     Vector v, vr, x, xr;
-    unsigned int box;
-    TIME tminmax, tdif;
+    unsigned int box, tminmax, tdif;
     std::vector<std::array<real, 2>> ret;
 
     assert(positions.size() == velocities.size());
@@ -220,7 +221,7 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
 
         //for all particles
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             v = velocities[t][j];
             x = positions[t][j];
@@ -236,11 +237,11 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
         }
 
         //average‌ bins
-        for (size_t i = 0; i < velbins.size(); ++i)
+        for (unsigned int i = 0; i < velbins.size(); ++i)
         {
             Vector avg_vec(0, 0);
 
-            for (size_t j = 0; j < velbins[i].size(); ++j)
+            for (unsigned int j = 0; j < velbins[i].size(); ++j)
             {
                 avg_vec += velbins[i][j];
             }
@@ -255,26 +256,26 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
     }
 
     //for all time bins
-    for (TIME dt = tmin; dt < std::min(tmax, velocities.size()); dt += tstep)
+    for (unsigned int dt = tmin; dt < std::min(tmax, static_cast<unsigned int> (velocities.size())); dt += tstep)
     {
         tminmax = dt + tstep;
-        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, velocities.size()) << "      ";
+        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, static_cast<unsigned int> (velocities.size())) << "      ";
         real sum = 0.;
         Vector sum1(0., 0.), sum2(0., 0.);
         unsigned int num = 0;
         //for all combinations of time (part 1)
-        for (TIME t1 = 0; t1 < velocities.size(); ++t1)
+        for (unsigned int t1 = 0; t1 < velocities.size(); ++t1)
         {
             //for all combinations of time (part 2)
-            for (TIME t2 = 0; t2 < velocities.size(); ++t2)
+            for (unsigned int t2 = 0; t2 < velocities.size(); ++t2)
             {
                 tdif = t2 - t1;
                 if (tdif >= dt && tdif < tminmax)
                 {
                     //for all bins
-                    for (size_t i = 0; i < vorbin; ++i)
+                    for (unsigned int i = 0; i < vorbin; ++i)
                     {
-                        for (size_t j = 0; j < vorbin; ++j)
+                        for (unsigned int j = 0; j < vorbin; ++j)
                         {
                             //calculate correlation
                             sum += velbins_avg[t1][i][j] * velbins_avg[t2][i][j];
@@ -290,7 +291,7 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
 
         //average over space
         c = (num == 0 ? 0. : sum / num - (sum1 / num) * (sum2 / num));
-        ret.push_back({dt, c});
+        ret.push_back(std::array<real, 2> {dt, c});
     }
 
     //normalize final correlation
@@ -307,12 +308,11 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
 
 //temporal vorticity-vorticity correlation function
 //tmin, tmax, tstep: time bins, vorbin: number of spatial bins
-std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, TIME tmin, TIME tmax, TIME tstep, unsigned int vorbin, real L)
+std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, unsigned int tmin, unsigned int tmax, unsigned int tstep, unsigned int vorbin, real L)
 {
     real c, l = L / vorbin;
     Vector v, vr, x, xr;
-    unsigned int box;
-    TIME tminmax, tdif;
+    unsigned int box, tminmax, tdif;
     std::vector<std::array<real, 2>> ret;
 
     assert(positions.size() == velocities.size());
@@ -329,7 +329,7 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
 
         //for all particles
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             v = velocities[t][j];
             x = positions[t][j];
@@ -346,11 +346,11 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
 
         //average‌ bins
         std::vector<std::vector<Vector>> velbins_avg(vorbin, std::vector<Vector>(vorbin));
-        for (size_t i = 0; i < velbins.size(); ++i)
+        for (unsigned int i = 0; i < velbins.size(); ++i)
         {
             Vector avg_vec(0, 0);
 
-            for (size_t j = 0; j < velbins[i].size(); ++j)
+            for (unsigned int j = 0; j < velbins[i].size(); ++j)
             {
                 avg_vec += velbins[i][j];
             }
@@ -365,9 +365,9 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
 
         //could be done with periodic boundaries...
         //calculate local curl for all bins (except outer layer)
-        for (size_t i = 1; i < velbins_avg.size() - 1; ++i)
+        for (unsigned int i = 1; i < velbins_avg.size() - 1; ++i)
         {
-            for (size_t j = 1; j < velbins_avg[i].size() -1; ++j)
+            for (unsigned int j = 1; j < velbins_avg[i].size() -1; ++j)
             {
                 local_curls[t][i-1][j-1] = localCurl(velbins_avg[i][j+1], velbins_avg[i+1][j], velbins_avg[i][j-1], velbins_avg[i-1][j], l);
             }
@@ -375,26 +375,26 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
     }
 
     //for all time bins
-    for (TIME dt = tmin; dt < std::min(tmax, velocities.size()); dt += tstep)
+    for (unsigned int dt = tmin; dt < std::min(tmax, static_cast<unsigned int> (velocities.size())); dt += tstep)
     {
         tminmax = dt + tstep;
-        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, velocities.size()) << "      ";
+        std::cerr << "\rtleft=" << dt << "/" << std::min(tmax, static_cast<unsigned int> (velocities.size())) << "      ";
         real sum = 0., sum1 = 0., sum2 = 0.;
         unsigned int num = 0;
 
         //for all combinations of time (part 1)
-        for (size_t t1 = 0; t1 < velocities.size(); ++t1)
+        for (unsigned int t1 = 0; t1 < velocities.size(); ++t1)
         {
             //for all combinations of time (part 2)
-            for (size_t t2 = 0; t2 < velocities.size(); ++t2)
+            for (unsigned int t2 = 0; t2 < velocities.size(); ++t2)
             {
                 tdif = t2 - t1;
                 if (tdif >= dt && tdif < tminmax)
                 {
                     //for all bins
-                    for (size_t i = 0; i < local_curls[t1].size(); ++i)
+                    for (unsigned int i = 0; i < local_curls[t1].size(); ++i)
                     {
-                        for (size_t j = 0; j < local_curls[t1][i].size(); ++j)
+                        for (unsigned int j = 0; j < local_curls[t1][i].size(); ++j)
                         {
                             //calculate correlation
                             sum += local_curls[t1][i][j] * local_curls[t2][i][j];
@@ -410,7 +410,7 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
 
         //average over space
         c = (num == 0 ? 0. : sum / num - (sum1 / num) * (sum2 / num));
-        ret.push_back({dt, c});
+        ret.push_back(std::array<real, 2> {dt, c});
     }
 
     //normalize final correlation
@@ -428,7 +428,7 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
 
 //spatial vorticity-vorticity correlation function
 //rmin, rmax, rstep: start, stop and width of histogram bins, tmin, tmax, tstep: start, stop und steps of time averaging, vorbin: number of spatial bins for vorticy calculation
-std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, TIME tmin, TIME tmax, TIME tstep, unsigned int vorbin, real L)
+std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, unsigned int tmin, unsigned int tmax, unsigned int tstep, unsigned int vorbin, real L)
 {
     real rleft, rright, sum, c, l = L / vorbin;
     Vector v, vr, x, xr, avg_vec;
@@ -445,11 +445,11 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all times
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
     {
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         //for all particles
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             v = velocities[t][j];
             x = positions[t][j];
@@ -465,12 +465,12 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
 
         //average‌ bins
         std::vector<std::vector<Vector>> velbins_avg (vorbin, std::vector<Vector>(vorbin));
-        for (size_t i = 0; i < velbins.size(); ++i)
+        for (unsigned int i = 0; i < velbins.size(); ++i)
         {
             avg_vec.x = 0.;
             avg_vec.y = 0.;
             avg_sum = 0;
-            for (size_t j = 0; j < velbins[i].size(); ++j)
+            for (unsigned int j = 0; j < velbins[i].size(); ++j)
             {
                 avg_vec += velbins[i][j];
                 avg_sum += 1;
@@ -485,9 +485,9 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
         //could be done with periodic boundaries...
         //calculate local curl for all bins (except outer layer)
         std::vector<std::vector<real>> local_curls(vorbin-2, std::vector<real> (vorbin-2));
-        for (size_t i = 1; i < velbins_avg.size() - 1; ++i)
+        for (unsigned int i = 1; i < velbins_avg.size() - 1; ++i)
         {
-            for (size_t j = 1; j < velbins_avg[i].size() -1; ++j)
+            for (unsigned int j = 1; j < velbins_avg[i].size() -1; ++j)
             {
                 local_curls[i-1][j-1] = localCurl(velbins_avg[i][j+1], velbins_avg[i+1][j], velbins_avg[i][j-1], velbins_avg[i-1][j], l);
             }
@@ -504,17 +504,17 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
             num = 0;
             rright = rleft + rstep;
 
-            std::cerr << "\rtleft=" << t << "/" << std::min(tmax, velocities.size()) << " " << "rleft=" << rleft << "/" << rmax << "      ";
+            std::cerr << "\rtleft=" << t << "/" << std::min(tmax, static_cast<unsigned int> (velocities.size())) << " " << "rleft=" << rleft << "/" << rmax << "      ";
 
 
             //for all combinations of bins
-            for (size_t i1 = 0; i1 < local_curls.size(); ++i1)
+            for (unsigned int i1 = 0; i1 < local_curls.size(); ++i1)
             {
-                for (size_t j1 = 0; j1 < local_curls[i1].size(); ++j1)
+                for (unsigned int j1 = 0; j1 < local_curls[i1].size(); ++j1)
                 {
-                    for (size_t i2 = 0; i2 < local_curls.size(); ++i2)
+                    for (unsigned int i2 = 0; i2 < local_curls.size(); ++i2)
                     {
-                        for (size_t j2 = 0; j2 < local_curls[i2].size(); ++j2)
+                        for (unsigned int j2 = 0; j2 < local_curls[i2].size(); ++j2)
                         {
                             real bin_dist = std::sqrt((i2-i1)*(i2-i1)+(j2-j1)*(j2-j1)) * l;
                             if (bin_dist >= rleft && bin_dist < rright)
@@ -547,7 +547,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
     {
         unsigned int mean_counter = 0;
         real mean_c = 0., sd_c = 0.;
-        for (size_t i = 0; i < ret2[ret2_ind].size(); ++i)
+        for (unsigned int i = 0; i < ret2[ret2_ind].size(); ++i)
         {
             mean_c += ret2[ret2_ind][i];
             mean_counter += 1;
@@ -558,7 +558,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
             mean_c /= mean_counter;
         }
         mean_counter = 0;
-        for (size_t i = 0; i < ret2[ret2_ind].size(); ++i)
+        for (unsigned int i = 0; i < ret2[ret2_ind].size(); ++i)
         {
             sd_c += (ret2[ret2_ind][i] - mean_c) * (ret2[ret2_ind][i] - mean_c);
             mean_counter += 1;
@@ -567,7 +567,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
         {
             sd_c = std::sqrt(1./(mean_counter - 1) * sd_c);
         }
-        ret.push_back({rleft, mean_c, sd_c});
+        ret.push_back(std::array<real, 3> {rleft, mean_c, sd_c});
         ret2_ind += 1;
     }
 
@@ -588,7 +588,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
 
 //temporal velocity-velocity auto correlation function AND temporal orientation-orientation auto correlation function
 //tmin, tmax, tstep: time bins
-std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, TIME tmin, TIME tmax, TIME tstep, real L)
+std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, unsigned int tmin, unsigned int tmax, unsigned int tstep, real L)
 {
     std::map<ID, std::vector<Vector>> per_id_velocities;
 
@@ -596,7 +596,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
 
     for (TIME t = 0; t < velocities.size(); ++t)
     {
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             //std::cout << t << " " << j << std::endl;
             //std::cout << ids[t][j] << std::endl;
@@ -607,10 +607,10 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
 
     std::cerr << "Finding longest trajectory:";
 
-    size_t maxlen = 0;
+    unsigned int maxlen = 0;
     for (const auto &vellist : per_id_velocities)
     {
-        maxlen = std::max(maxlen, vellist.second.size());
+        maxlen = std::max(maxlen, static_cast<unsigned int> (vellist.second.size()));
     }
 
     std::cerr << " " << maxlen << std::endl;
@@ -625,7 +625,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
     for (const auto &entry : per_id_velocities)
     {
         const auto &vellist = entry.second;
-        for (TIME deltat = tmin; deltat < std::min(vellist.size(), tmax); deltat += tstep)
+        for (TIME deltat = tmin; deltat < std::min(static_cast<unsigned int> (vellist.size()), tmax); deltat += tstep)
         {
             //TODO bin times
             for (TIME start = 0; start < vellist.size() - deltat; ++start)
@@ -647,7 +647,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
     std::vector<std::array<real, 2>> ret(maxlen);
     for (TIME t = 0; t < maxlen; ++t)
     {
-        ret[t] = {t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
+        ret[t] = std::array<real, 2>{t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
     }
 
     real norm = ret.front()[1];
@@ -661,9 +661,9 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVel(std::vector<std::vector
 
 
 //temporal vorticity auto correlation function
-std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, TIME tmin, TIME tmax, TIME tstep, unsigned int vorbin, real L)
+std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, unsigned int tmin, unsigned int tmax, unsigned int tstep, unsigned int vorbin, real L)
 {
-    size_t tt = velocities.size();
+    unsigned int tt = velocities.size();
     unsigned int box;
     real l = L / vorbin;
 
@@ -679,7 +679,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         std::vector<std::vector<Vector>> velbins_avg(vorbin, std::vector<Vector>(vorbin));
 
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             assert(velocities[t].size() == positions[t].size());
             v = velocities[t][j];
@@ -695,10 +695,10 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
 
         //average‌ bins
 
-        for (size_t i = 0; i < velbins.size(); ++i)
+        for (unsigned int i = 0; i < velbins.size(); ++i)
         {
             Vector avg_vec(0, 0);
-            for (size_t j = 0; j < velbins[i].size(); ++j)
+            for (unsigned int j = 0; j < velbins[i].size(); ++j)
             {
                 avg_vec += velbins[i][j];
             }
@@ -712,9 +712,9 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
         //could be done with periodic boundaries...
         //calculate local curl for all bins (except outer layer)
 
-        for (size_t i = 1; i < velbins_avg.size() - 1; ++i)
+        for (unsigned int i = 1; i < velbins_avg.size() - 1; ++i)
         {
-            for (size_t j = 1; j < velbins_avg[i].size() -1; ++j)
+            for (unsigned int j = 1; j < velbins_avg[i].size() -1; ++j)
             {
                 local_curls[t][i-1][j-1] = localCurl(velbins_avg[i][j+1], velbins_avg[i+1][j], velbins_avg[i][j-1], velbins_avg[i-1][j], l);
             }
@@ -729,7 +729,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
 
     for (TIME t = 0; t < positions.size(); ++t)
     {
-        for (size_t j = 0; j < positions[t].size(); ++j)
+        for (unsigned int j = 0; j < positions[t].size(); ++j)
         {
             x = FixBorder(positions[t][j], L);
             xbin = static_cast<unsigned int>(x.x/l);
@@ -754,10 +754,10 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
 
     std::cerr << "Finding longest trajectory:";
 
-    size_t maxlen = 0;
+    unsigned int maxlen = 0;
     for (const auto &vellist : per_id_vorticities)
     {
-        maxlen = std::max(maxlen, vellist.second.size());
+        maxlen = std::max(maxlen, static_cast<unsigned int> (vellist.second.size()));
     }
 
     std::cerr << " " << maxlen << std::endl;
@@ -772,7 +772,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
     for (const auto &entry : per_id_vorticities)
     {
         const auto &vellist = entry.second;
-        for (TIME deltat = tmin; deltat < std::min(vellist.size(), tmax); deltat += tstep)
+        for (TIME deltat = tmin; deltat < std::min(static_cast<unsigned int> (vellist.size()), tmax); deltat += tstep)
         {
             //TODO bin times
             for (TIME start = 0; start < vellist.size() - deltat; ++start)
@@ -794,7 +794,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
     std::vector<std::array<real, 2>> ret(maxlen);
     for (TIME t = 0; t < maxlen; ++t)
     {
-        ret[t] = {t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
+        ret[t] = std::array<real, 2> {t, (num[t] == 0 ? 0. : (correlations_ttr[t]/num[t]) - (correlations_tt[t]/num[t])*(correlations_trtr[t]/num[t]))};
     }
 
     real norm = ret.front()[1];
@@ -810,7 +810,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
 
 //vorticity histogram
 //rmin, rmax, rstep: start, stop and width of correlation bins, tmin, tmax, tstep: start, stop und steps of time averaging, vorbin: number of boxes (bins)
-std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, TIME tmin, TIME tmax, TIME tstep, unsigned int vorbin, real L)
+std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, unsigned int tmin, unsigned int tmax, unsigned int tstep, unsigned int vorbin, real L)
 {
     real rleft, l = L / vorbin;
     Vector v, vr, x, xr, avg_vec;
@@ -826,11 +826,11 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all times
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
     {
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         //for all particles
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             v = velocities[t][j];
             x = positions[t][j];
@@ -846,12 +846,12 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
 
         //average‌ bins
         std::vector<std::vector<Vector>> velbins_avg (vorbin, std::vector<Vector>(vorbin));
-        for (size_t i = 0; i < velbins.size(); ++i)
+        for (unsigned int i = 0; i < velbins.size(); ++i)
         {
             avg_vec.x = 0.;
             avg_vec.y = 0.;
             avg_sum = 0;
-            for (size_t j = 0; j < velbins[i].size(); ++j)
+            for (unsigned int j = 0; j < velbins[i].size(); ++j)
             {
                 avg_vec += velbins[i][j];
                 avg_sum += 1;
@@ -866,9 +866,9 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
 
         //calculate local curl for all bins (except outer layer)
         std::vector<std::vector<real>> local_curls(vorbin-2, std::vector<real> (vorbin-2));
-        for (size_t i = 1; i < velbins_avg.size() - 1; ++i)
+        for (unsigned int i = 1; i < velbins_avg.size() - 1; ++i)
         {
-            for (size_t j = 1; j < velbins_avg[i].size() -1; ++j)
+            for (unsigned int j = 1; j < velbins_avg[i].size() -1; ++j)
             {
                 local_curls[i-1][j-1] = localCurl(velbins_avg[i][j+1], velbins_avg[i+1][j], velbins_avg[i][j-1], velbins_avg[i-1][j], l);
                 box = static_cast<int> ((local_curls[i-1][j-1] - std::fmod(local_curls[i-1][j-1], rstep) - rmin) / rstep);
@@ -892,7 +892,7 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
     ret2_ind = 0;
     for (rleft = rmin; rleft < rmax; rleft += rstep)
     {
-        ret.push_back({rleft, ret2[ret2_ind], 0.});
+        ret.push_back(std::array<real, 3> {rleft, ret2[ret2_ind], 0.});
         ret2_ind += 1;
     }
 
@@ -904,7 +904,7 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
 
 //velocity histogram
 //rmin, rmax, rstep: start, stop and width of correlation bins, tmin, tmax, tstep: start, stop und steps of time averaging, vorbin: number of boxes (bins)
-std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, TIME tmin, TIME tmax, TIME tstep, real L)
+std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> velocities, real rmin, real rmax, real rstep, unsigned int tmin, unsigned int tmax, unsigned int tstep, real L)
 {
     real rleft, vnorm;
     Vector v, vr, x, xr, avg_vec;
@@ -918,10 +918,10 @@ std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> 
     }
 
     //for all times
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep)
     {
         //for all particles
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             vnorm = velocities[t][j].Norm();
             box = static_cast<int> ((vnorm - std::fmod(vnorm, rstep) - 2* rmin) / rstep); //((vnorm - std::fmod(vnorm, rstep) - rmin) / rstep);
@@ -941,7 +941,7 @@ std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> 
     ret2_ind = 0;
     for (rleft = rmin; rleft < rmax; rleft += rstep)
     {
-        ret.push_back({rleft, ret2[ret2_ind], 0.});
+        ret.push_back(std::array<real, 3> {rleft, ret2[ret2_ind], 0.});
         ret2_ind += 1;
     }
 
@@ -954,7 +954,7 @@ std::vector<std::array<real, 3>> histogramXVel(std::vector<std::vector<Vector>> 
 
 //per id velocity histogram
 //rmin, rmax, rstep: start, stop and width of correlation bins, tmin, tmax, tstep: start, stop und steps of time averaging
-std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, real rmin, real rmax, real rstep, TIME tmin, TIME tmax, TIME tstep, real L)
+std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, real rmin, real rmax, real rstep, unsigned int tmin, unsigned int tmax, unsigned int tstep, real L)
 {
     real rleft;
     unsigned int ret2_ind, box;
@@ -962,9 +962,9 @@ std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std
     std::map<ID, std::vector<unsigned int>> ret2;
     std::map<ID, std::vector<real>> per_id_velocities;
 
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep)
+    for (TIME t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep)
     {
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             //std::cout << t << " " << j << std::endl;
             //std::cout << ids[t][j] << std::endl;
@@ -1007,7 +1007,7 @@ std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std
         ret2_ind = 0;
         for (rleft = rmin; rleft < rmax; rleft += rstep)
         {
-            ret[entry.first].push_back({rleft, ret2[entry.first][ret2_ind], 0.});
+            ret[entry.first].push_back(std::array<real, 3> {rleft, ret2[entry.first][ret2_ind], 0.});
             ret2_ind += 1;
         }
     }
@@ -1020,14 +1020,14 @@ std::map<ID, std::vector<std::array<real, 3>>> perIDhistogramVel(std::vector<std
 
 //per id traveled pathlength
 //rmin, rmax, rstep: start, stop and width of correlation bins, tmin, tmax, tstep: start, stop und steps of time averaging
-std::map<ID, std::array<real, 3>> perIDtraveledPathlength(std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, TIME tmin, TIME tmax, TIME tstep)
+std::map<ID, std::array<real, 3>> perIDtraveledPathlength(std::vector<std::vector<Vector>> velocities, std::vector<std::vector<ID>> ids, unsigned int tmin, unsigned int tmax, unsigned int tstep)
 {
     std::map<ID, std::array<real, 3>> ret;
     std::map<ID, std::vector<real>> per_id_velocities;
 
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep)
+    for (TIME t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep)
     {
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             //std::cout << t << " " << j << std::endl;
             //std::cout << ids[t][j] << std::endl;
@@ -1039,7 +1039,7 @@ std::map<ID, std::array<real, 3>> perIDtraveledPathlength(std::vector<std::vecto
     //for all ids
     for (std::pair<ID, std::vector<real>> entry : per_id_velocities)
     {
-        ret[entry.first] = {0., 0., 0.};
+        ret[entry.first] = std::array<real, 3> {0., 0., 0.};
 
         //for all particles of a id
         for (real vnorm : entry.second)
@@ -1141,7 +1141,7 @@ std::vector<std::array<real, 3>> number_fluctuations(std::vector<std::vector<Vec
         sd_abs_dist_to_average /= (element->second.size()-1);
         sd_abs_dist_to_average = std::sqrt(sd_abs_dist_to_average);
 
-        ret.push_back({real(max_no_of_particles) / (element->first * element->first), mean_abs_dist_to_average, sd_abs_dist_to_average});
+        ret.push_back(std::array<real, 3> {real(max_no_of_particles) / (element->first * element->first), mean_abs_dist_to_average, sd_abs_dist_to_average});
     }
 
     return ret;
@@ -1188,7 +1188,7 @@ std::vector<std::map<unsigned int, unsigned int>> clusterSizes(std::vector<std::
     std::vector<std::map<unsigned int, unsigned int>> ret;
     int delete_index, cluster_index;
     bool cluster_cond;
-    for (TIME t = tstart; t < std::min(tstop, positions.size()); t += tstep)
+    for (TIME t = tstart; t < std::min(tstop, static_cast<unsigned int> (positions.size())); t += tstep)
     {
         cluster_index = 0;
 
@@ -1196,7 +1196,7 @@ std::vector<std::map<unsigned int, unsigned int>> clusterSizes(std::vector<std::
         std::vector<int> cluster(positions[t].size(), -1);
 
         //later: iterate over all particles in 9 boxes
-        for (size_t p = 0; p < positions[t].size(); ++p)
+        for (unsigned int p = 0; p < positions[t].size(); ++p)
         {
             //particle not in cluster yet
             if (cluster[p] == -1)
@@ -1205,7 +1205,7 @@ std::vector<std::map<unsigned int, unsigned int>> clusterSizes(std::vector<std::
                 cluster_index++;
             }
 
-            for (size_t p2 = 0; p2 < positions[t].size(); ++p2)
+            for (unsigned int p2 = 0; p2 < positions[t].size(); ++p2)
             {
                 if (p == p2)
                 {
@@ -1226,7 +1226,7 @@ std::vector<std::map<unsigned int, unsigned int>> clusterSizes(std::vector<std::
 
                         //join clusters (now the id of p2 is free?????!!!!!!)
                         //naiv: faster method??? like for example bookkeeping of all clusters
-                        for (size_t c = 0; c < positions[t].size(); ++c)
+                        for (unsigned int c = 0; c < positions[t].size(); ++c)
                         {
                             if (cluster[c] == delete_index)
                             {
@@ -1282,7 +1282,7 @@ std::vector<std::map<unsigned int, unsigned int>> clusterSizes(std::vector<std::
 
 
 //enstrophy per unit area
-real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, TIME tmin, TIME tmax, TIME tstep, unsigned int vorbin, real L)
+real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vector<Vector>> velocities, unsigned int tmin, unsigned int tmax, unsigned int tstep, unsigned int vorbin, real L)
 {
     real l = L / vorbin;
     Vector v, vr, x, xr, avg_vec;
@@ -1295,11 +1295,11 @@ real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vect
     assert(positions.size() == velocities.size());
 
     //for all times
-    for (TIME t = tmin; t < std::min(tmax, velocities.size()); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
+    for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
     {
         std::vector<std::vector<Vector>> velbins(vorbin*vorbin);
         //for all particles
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             v = velocities[t][j];
             x = positions[t][j];
@@ -1315,12 +1315,12 @@ real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vect
 
         //average‌ bins
         std::vector<std::vector<Vector>> velbins_avg (vorbin, std::vector<Vector>(vorbin));
-        for (size_t i = 0; i < velbins.size(); ++i)
+        for (unsigned int i = 0; i < velbins.size(); ++i)
         {
             avg_vec.x = 0.;
             avg_vec.y = 0.;
             avg_sum = 0;
-            for (size_t j = 0; j < velbins[i].size(); ++j)
+            for (unsigned int j = 0; j < velbins[i].size(); ++j)
             {
                 avg_vec += velbins[i][j];
                 avg_sum += 1;
@@ -1334,9 +1334,9 @@ real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vect
 
 
         //calculate local curl for all bins (except outer layer) and add to enstrophy
-        for (size_t i = 1; i < velbins_avg.size() - 1; ++i)
+        for (unsigned int i = 1; i < velbins_avg.size() - 1; ++i)
         {
-            for (size_t j = 1; j < velbins_avg[i].size() -1; ++j)
+            for (unsigned int j = 1; j < velbins_avg[i].size() -1; ++j)
             {
                 loccurl = localCurl(velbins_avg[i][j+1], velbins_avg[i+1][j], velbins_avg[i][j-1], velbins_avg[i-1][j], l);
                 ret += 1./2. * loccurl * loccurl;
@@ -1369,15 +1369,15 @@ void NormalizedEqualTimeVelocityCorrelation()
 
 //copied from read_data_single from constants.cpp/hpp
 // times = {1,2,3} reads line 1,2,3
-std::string read_ids(std::string filename, std::vector<std::vector<ID>> &ids, std::vector<TIME> &times)
+std::string read_ids(std::string filename, std::vector<std::vector<ID>> &ids, std::vector<unsigned int> &times)
 {
     std::ifstream in;
     in.open(filename);
     assert(!in.fail() && "Could not open file");
 
-    ID id;
+    unsigned int id;
     unsigned int linenum = 1;
-    TIME time = 0;
+    unsigned int time = 0;
 
     std::string firstline, line;
     std::vector<ID> idsv; //()
@@ -1486,15 +1486,15 @@ int main(int argc, char** argv)
     real rmax = std::stof(argv[18]);
     real rstep = std::stof(argv[19]);
 
-    TIME tstart = std::stoi(argv[20]);
-    TIME tend = std::stoi(argv[21]);
-    TIME tstep = std::stoi(argv[22]);
+    unsigned int tstart = std::stoi(argv[20]);
+    unsigned int tend = std::stoi(argv[21]);
+    unsigned int tstep = std::stoi(argv[22]);
     unsigned int Xvortstart = std::stoi(argv[23]);
     unsigned int Xvortend = std::stoi(argv[24]);
     unsigned int Xvortstep = std::stoi(argv[25]);
-    TIME times_start = std::stoi(argv[26]);
-    TIME times_stop = std::stoi(argv[27]);
-    TIME times_step = std::stoi(argv[28]);
+    unsigned int times_start = std::stoi(argv[26]);
+    unsigned int times_stop = std::stoi(argv[27]);
+    unsigned int times_step = std::stoi(argv[28]);
     unsigned int vorticity_bins = std::stoi(argv[29]);
     unsigned int FlowGridPoints = std::stoi(argv[30]);
 
@@ -1586,7 +1586,7 @@ int main(int argc, char** argv)
     for (std::pair<TIME, std::vector<real>> element : angles_dict)
     {
         std::vector<Vector> tmp(element.second.size());
-        for (size_t i = 0; i < tmp.size(); ++i)
+        for (unsigned int i = 0; i < tmp.size(); ++i)
         {
             tmp[i] = Vector(std::cos(element.second[i]), std::sin(element.second[i]));
         }
@@ -1599,7 +1599,7 @@ int main(int argc, char** argv)
     //ids: read in from file or generate automatically based on indice in
     //positions/angle/... list
     std::vector<std::vector<ID>> ids;
-    size_t N;
+    int N;
     if (ids_from_file)
     {
         read_ids(path + filename_ids, ids, ALLTIMES);
@@ -1611,13 +1611,13 @@ int main(int argc, char** argv)
         //ids are always 0 to N-1
         for (auto _: ALLTIMES)
         {
-            ids.push_back(MakeTimes<size_t>(0, N, 1));
+            ids.push_back(MakeTimes(0, N, 1));
         }
     }
 
 
     assert(positions.size() == ALLTIMES.size());
-    TIME times = positions.size();
+    unsigned int times = positions.size();
 
     std::cout << "N: " << N << ", times: " << times << std::endl; //just N of the first line (for debug)
 
@@ -1746,9 +1746,9 @@ int main(int argc, char** argv)
         {
             positions[t] = std::vector<Vector>(FlowGridPoints*FlowGridPoints);
             ID idindex = 0;
-            for (size_t x = 0; x < pL; x += FlowStep)
+            for (unsigned int x = 0; x < pL; x += FlowStep)
             {
-                for (size_t y = 0; y < pL; y += FlowStep)
+                for (unsigned int y = 0; y < pL; y += FlowStep)
                 {
                     assert(idindex < FlowGridPoints*FlowGridPoints);
                     positions[t][idindex] = Vector(x, y);
@@ -1765,7 +1765,7 @@ int main(int argc, char** argv)
         for (TIME t = 0; t < velocities.size(); ++t)
         {
             velocities[t] = std::vector<Vector>();
-            for (size_t j = 0; j < positions[t].size(); ++j)
+            for (unsigned int j = 0; j < positions[t].size(); ++j)
             {
                 v1 = positions[t][j];
                 ID id = ids[t][j];
@@ -1799,7 +1799,7 @@ int main(int argc, char** argv)
     for (TIME t = 0; t < directions.size(); ++t)
     {
         directions[t] = std::vector<Vector>(velocities[t].size());
-        for (size_t j = 0; j < velocities[t].size(); ++j)
+        for (unsigned int j = 0; j < velocities[t].size(); ++j)
         {
             real norm_real = velocities[t][j].Norm();
             if (norm_real == 0.)
