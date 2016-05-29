@@ -126,7 +126,7 @@ std::vector<std::array<real, 2>> correlationPoneXVel(std::vector<std::vector<Vec
     Vector v, vr, x, xr;
     int num;
     std::vector<std::array<real, 2>> ret;
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
     std::vector<Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all bins
@@ -208,7 +208,7 @@ std::vector<std::array<real, 2>> correlationPoneTVel(std::vector<std::vector<Vec
     unsigned int box, tminmax, tdif;
     std::vector<std::array<real, 2>> ret;
 
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //avg vel for i,j bin (vorbin x vorbin) with first index being time (from 0 to tmax-1)
@@ -315,7 +315,7 @@ std::vector<std::array<real, 2>> correlationPoneTVor(std::vector<std::vector<Vec
     unsigned int box, tminmax, tdif;
     std::vector<std::array<real, 2>> ret;
 
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //avg vel for i,j bin (vorbin x vorbin) with first index being time (from 0 to tmax-1)
@@ -441,7 +441,7 @@ std::vector<std::array<real, 3>> correlationPoneXVor(std::vector<std::vector<Vec
     {
         ret2.push_back(std::vector<real> ());
     }
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all times
@@ -669,7 +669,7 @@ std::vector<std::array<real, 2>> correlationPoneTAutoVor(std::vector<std::vector
 
     Vector v, x;
 
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
 
     std::vector<std::vector<std::vector<real>>> local_curls(tt, std::vector<std::vector<real>>(vorbin-2, std::vector<real>(vorbin-2)));
     //for all particles
@@ -822,7 +822,7 @@ std::vector<std::array<real, 3>> histogramXVor(std::vector<std::vector<Vector>> 
     {
         ret2.push_back(static_cast<unsigned int> (0));
     }
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
     std::map<ID, Vector>::iterator posit1, posit2, velit1, velit2;
 
     //for all times
@@ -1292,7 +1292,7 @@ real Enstrophy(std::vector<std::vector<Vector>> positions, std::vector<std::vect
     real loccurl;
 
 
-    assert(positions.size() == velocities.size());
+    //assert(positions.size() == velocities.size());
 
     //for all times
     for (unsigned int t = tmin; t < std::min(tmax, static_cast<unsigned int> (velocities.size())); t += tstep) //for (int t = 0; t < velocities.size(); ++t)
